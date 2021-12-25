@@ -1,0 +1,38 @@
+[
+    {
+        "code": "EI",
+        "name": "Ireland"
+    },
+    {
+        "code": "GM",
+        "name": "Germany"
+    },
+    {
+        "code": "IC",
+        "name": "Iceland"
+    },
+    {
+        "code": "IT",
+        "name": "Italy"
+    },
+    {
+        "code": "PL",
+        "name": "Poland"
+    },
+    {
+        "code": "PO",
+        "name": "Portugal"
+    },
+    {
+        "code": "SW",
+        "name": "Sweden"
+    },
+    {
+        "code": "UK",
+        "name": "United Kingdom"
+    },
+    {
+        "code": "UP",
+        "name": "Ukraine"
+    }
+]
