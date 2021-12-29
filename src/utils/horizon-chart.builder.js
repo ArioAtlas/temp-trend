@@ -4,7 +4,7 @@ export class HorizonChartBuilder {
     constructor(container, data, mapper, options) {
         this._container = container;
         this._width = options.width;
-        this._size = options.size;
+        this._height = options.height;
         this._curve = options.curve;
         this._padding = options.padding;
         this._bands = options.bands;
@@ -44,20 +44,17 @@ export class HorizonChartBuilder {
             ? new D3.InternSet(options.zDomain)
             : new D3.InternSet(this._Z);
 
+        const size = (this._height - this._marginTop - this._marginBottom)/ (zDomain.size?zDomain.size:1)
         const xRange = [this._marginLeft, this._width - this._marginRight]; // [left, right]
         const yRange = [
-            this._size,
-            this._size - this._bands * (this._size - this._padding),
+            size,
+            size - this._bands * (size - this._padding),
         ]; // [bottom, top]
 
         // Omit any data not present in the z-domain.
         const I = D3.range(this._X.length).filter((i) =>
             zDomain.has(this._Z[i])
         );
-
-        // Compute height.
-        this._height =
-            zDomain.size * this._size + this._marginTop + this._marginBottom;
 
         // Construct scales and axes.
         const xScale = xType(xDomain, xRange);
@@ -89,7 +86,7 @@ export class HorizonChartBuilder {
             .join('g')
             .attr(
                 'transform',
-                (_, i) => `translate(0,${i * this._size + this._marginTop})`
+                (_, i) => `translate(0,${i * size + this._marginTop})`
             );
 
         const defs = g.append('defs');
@@ -99,7 +96,7 @@ export class HorizonChartBuilder {
             .append('rect')
             .attr('y', this._padding)
             .attr('width', this._width)
-            .attr('height', this._size - this._padding);
+            .attr('height', size - this._padding);
 
         defs.append('path')
             .attr('id', (_, i) => `${uid}-path-${i}`)
@@ -113,14 +110,14 @@ export class HorizonChartBuilder {
             .data((d, i) => new Array(this._bands).fill(i))
             .join('use')
             .attr('fill', (_, i) => colors[i + Math.max(0, 3 - this._bands)])
-            .attr('transform', (_, i) => `translate(0,${i * this._size})`)
+            .attr('transform', (_, i) => `translate(0,${i * size})`)
             .attr(
                 'xlink:href',
                 (i) => `${new URL(`#${uid}-path-${i}`, window.location)}`
             );
 
         g.append('text')
-            .attr('y', (this._size + this._padding) / 2)
+            .attr('y', (size + this._padding) / 2)
             .attr('dy', '0.35em')
             .attr('fill', this._darkTheme ? 'white' : 'black')
             .text(([z]) => z);
