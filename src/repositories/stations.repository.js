@@ -4,6 +4,7 @@ export class StationRepository {
 
     static getInstance() {
         if (!this.instance) this.instance = new StationRepository();
+        this.instance.set()
 
         return this.instance;
     }

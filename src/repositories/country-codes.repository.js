@@ -4,6 +4,7 @@ export class CountryCodesRepository {
 
     static getInstance() {
         if (!this.instance) this.instance = new CountryCodesRepository();
+        this.instance.set()
 
         return this.instance;
     }

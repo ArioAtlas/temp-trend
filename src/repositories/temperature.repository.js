@@ -4,6 +4,7 @@ export class TemperatureRepository {
 
     static getInstance() {
         if (!this.instance) this.instance = new TemperatureRepository();
+        this.instance.set()
 
         return this.instance;
     }
