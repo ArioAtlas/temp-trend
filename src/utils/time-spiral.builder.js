@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 
 export class TimeSpiralBuilder {
     constructor(container) {
+        container.html('')
         this._container = container;
         this._g = null;
 
