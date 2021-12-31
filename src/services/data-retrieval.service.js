@@ -1,7 +1,7 @@
 import { groupBy, mapValues } from 'lodash';
-import { CountryCodesRepository } from './country-codes.repository';
-import { StationRepository } from './stations.repository';
-import { TemperatureRepository } from './temperature.repository';
+import { CountryCodesRepository } from '../repositories/country-codes.repository';
+import { StationRepository } from '../repositories/stations.repository';
+import { TemperatureRepository } from '../repositories/temperature.repository';
 
 export class DataRetrieval {
     static #instance = null;
