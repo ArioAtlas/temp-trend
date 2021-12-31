@@ -23,9 +23,27 @@ body {
 .plot {
     position: absolute;
     top: 10vh;
-    bottom: 10vh;
+    bottom: 17vh;
     left: 25vh;
     right: 25vh;
     overflow: hidden;
     text-align: center;
+}
+
+.control {
+    position: absolute;
+    height: 7vh;
+    bottom: 5vh;
+    left: 25vh;
+    right: 25vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    align-content: center;
+
+    .control-field {
+        width: 100%;
+        margin: 0px 50px;
+    }
 }

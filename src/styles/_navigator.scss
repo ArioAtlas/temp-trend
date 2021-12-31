@@ -1,8 +1,42 @@
 .navigator {
     position: absolute;
     top: 5vh;
-    left: 20vw;
-    right: 20vw;
+    left: 30vw;
+    right: 30vw;
+
+    nav {
+        ul {
+            li {
+                &.active {
+                    border-bottom: 2px solid orangered;
+                }
+            }
+        }
+    }
+}
+
+.sub-navigator {
+    position: absolute;
+    bottom: 14vh;
+    left: 30vw;
+    right: 30vw;
+
+    nav {
+        ul {
+            width: 300px;
+            margin: auto;
+
+            li {
+                font-weight: 400;
+                letter-spacing: 0.2em;
+                font-size: 0.75rem;
+
+                &.active {
+                    border-bottom: 2px solid dodgerblue;
+                }
+            }
+        }
+    }
 }
 
 nav {

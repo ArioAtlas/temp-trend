@@ -7,13 +7,12 @@ import LocationsView from './components/pages/LocationsView';
 import YearsView from './components/pages/YearsView';
 import MonthsView from './components/pages/MonthsView';
 
-const data = require('./demo3.json');
-
 export class App extends Component {
     constructor() {
         super();
         this.state = {
             page: 'Overview',
+            view: 'Temperature',
             filters: {},
             data: {},
         };
@@ -47,6 +46,13 @@ export class App extends Component {
                         pages={['Overview', 'Locations', 'Years', 'Months']}
                         current={this.state.page}
                         onChange={(page) => this.switchPage(page)}
+                    />
+                </div>
+                <div className="sub-navigator">
+                    <Navigator
+                        pages={['Temperature', 'Observation']}
+                        current={this.state.view}
+                        onChange={(view) => console.log(view)}
                     />
                 </div>
                 {this.renderPage()}

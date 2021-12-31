@@ -7,9 +7,9 @@ function HorizonChart({ data, width, height }) {
         (svg) => {
             const options = {
                 curve: D3.curveLinear, // method of interpolation between points
-                marginTop: 20, // top margin, in pixels
+                marginTop: 25, // top margin, in pixels
                 marginRight: 0, // right margin, in pixels
-                marginBottom: 0, // bottom margin, in pixels
+                marginBottom: 40, // bottom margin, in pixels
                 marginLeft: 150, // left margin, in pixels
                 width, // outer width, in pixels
                 height, // outer height, in pixels

@@ -1,0 +1,70 @@
+.switch {
+    $circ: 60px;
+    $switch-height: 48px;
+    transform: scale(0.5);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+
+    .title {
+        font-size: 2rem;
+        color: $light-gray;
+        margin: 0 25px;
+    }
+
+    .hide {
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+    }
+
+    label {
+        display: block;
+        position: relative;
+        cursor: pointer;
+        outline: none;
+        user-select: none;
+        padding: 2px;
+        width: $switch-height * 2.3;
+        height: $switch-height;
+        border-radius: $switch-height/2;
+        background: #1a1a1a;
+        transition: box-shadow 0.4s;
+
+        &:after {
+            display: block;
+            position: absolute;
+            content: '';
+            top: 0;
+            left: 0;
+            bottom: 0;
+            margin: auto 0;
+
+            width: $circ;
+            height: $circ;
+            background: rgb(75, 75, 75);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: background 0.4s, left 0.4s, height 0.2s, width 0.2s;
+        }
+    }
+
+    input:checked + label {
+        box-shadow: inset 0 0 0 $switch-height $secondary;
+    }
+
+    label:active:after,
+    input:checked + label:active:after {
+        height: $switch-height/1.1;
+        width: $switch-height * 1.2;
+    }
+
+    input:checked + label:after {
+        left: calc(100% - #{$circ});
+        background: #ffffff;
+    }
+}

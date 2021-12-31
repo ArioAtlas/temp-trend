@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
+import RangeSlider from '../slider/RangeSlider';
 import HorizonChart from './../HorizonChart';
 import Selector from '../Selector';
 
@@ -37,6 +38,17 @@ function LocationsView() {
                     width={layout.width}
                     height={layout.height}
                 />
+            </div>
+            <div className="control">
+                <div className="control-field">
+                    <RangeSlider
+                        min={1}
+                        max={12}
+                        callback={(range) => console.log(range)}
+                        trackColor={'#254589'}
+                        label="Elevation"
+                    />
+                </div>
             </div>
         </div>
     );
