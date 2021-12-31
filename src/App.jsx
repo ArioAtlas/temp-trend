@@ -23,6 +23,10 @@ export class App extends Component {
         this.setState({ page });
     }
 
+    switchView(view) {
+        this.setState({ view });
+    }
+
     renderPage() {
         switch (this.state.page) {
             case 'Overview':
@@ -52,7 +56,7 @@ export class App extends Component {
                     <Navigator
                         pages={['Temperature', 'Observation']}
                         current={this.state.view}
-                        onChange={(view) => console.log(view)}
+                        onChange={(view) => this.switchView(view)}
                     />
                 </div>
                 {this.renderPage()}
