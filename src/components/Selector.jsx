@@ -1,22 +1,22 @@
 import { ReactComponent as Circle } from './icons/circle.svg';
 
-function Selector({ position, values, active, onClick }) {
-  return (
-    <div className={`selector ${position}`}>
-      <ul>
-        {(values ?? []).map((item) => (
-          <li
-            key={item}
-            className={item === active ? 'active' : ''}
-            onClick={() => (onClick ? onClick(item) : null)}
-          >
-            <Circle />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+function Selector({ position, values, active, onClick, get }) {
+    return (
+        <div className={`selector ${position}`}>
+            <ul>
+                {(Object.keys(values) ?? []).map((id) => (
+                    <li
+                        key={id}
+                        className={id === active ? 'active' : ''}
+                        onClick={() => (onClick ? onClick(id) : null)}
+                    >
+                        <Circle />
+                        <span>{get ? get(values[id]) : values[id]}</span>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 }
 
 export default Selector;

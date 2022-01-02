@@ -1,8 +1,9 @@
 import * as d3 from 'd3';
+import { unionBy } from 'lodash';
 
 export class TimeSpiralBuilder {
     constructor(container) {
-        container.html('')
+        container.html('');
         this._container = container;
         this._g = null;
 
@@ -42,6 +43,7 @@ export class TimeSpiralBuilder {
         this._field = {
             date: 'date',
             value: 'value',
+            color: 'value',
         };
 
         this._time = null;
@@ -61,6 +63,12 @@ export class TimeSpiralBuilder {
         return arguments.length
             ? ((this._width = _[0]), (this._height = _[1]), this)
             : [this._width, this._height];
+    }
+
+    range(_) {
+        return arguments.length
+            ? ((this._min = _[0]), (this._max = _[1]), this)
+            : [this._min, this._max];
     }
 
     innerRadius(_) {
@@ -129,13 +137,49 @@ export class TimeSpiralBuilder {
         }
     }
 
+    _fillNa() {
+        const base = [];
+        const start = new Date(this._firstDay);
+        const end = new Date(this._lastDay);
+
+        const extra = (end - start) / 1000 < 60 * 60 * 24 * 365 ? 15 : 0;
+
+        for (
+            let year = start.getFullYear() - extra;
+            year <= end.getFullYear() + extra;
+            year++
+        ) {
+            for (let month = 1; month <= 12; month++) {
+                base.push({
+                    [this._field.date]: new Date(
+                        `${year}-${month}-1`
+                    ).toISOString(),
+                    [this._field.value]: this._min,
+                    na: true,
+                });
+            }
+        }
+        this._data = unionBy(this._data, base, (x) => x[this._field.date]);
+
+        if (extra) {
+            this._firstDay = this._data[0][this._field.date];
+            this._lastDay = this._data[this._data.length - 1][this._field.date];
+        }
+
+        console.log(this._data);
+    }
+
     _process() {
-        const ext = d3.extent(this._data.map((d) => d[this._field.value]));
-        this._min = ext[0];
-        this._max = ext[1];
+        if (this._min === undefined || this._max === undefined) {
+            const ext = d3.extent(this._data.map((d) => d[this._field.value]));
+            this._min = ext[0];
+            this._max = ext[1];
+        }
 
         this._firstDay = this._data[0][this._field.date];
         this._lastDay = this._data[this._data.length - 1][this._field.date];
+
+        this._fillNa();
 
         this._spiralLength = this._spiral.node().getTotalLength();
         this._barWidth =
@@ -163,6 +207,7 @@ export class TimeSpiralBuilder {
                 offset: 0, // tick text offset
                 size: size,
                 angle: (Math.atan2(p2.y, p2.x) * 180) / Math.PI - 90,
+                na: d.na ?? false,
             };
         });
 
@@ -260,7 +305,8 @@ export class TimeSpiralBuilder {
 
         var color;
         if (this._style.colorBy === 'value')
-            color = (d) => this._color(d.value);
+            color = (d) =>
+                this._color(d.na ? (this._max + this._min) / 2 : d.value);
         else
             color = (d) => {
                 const key = d.date.getFullYear() + '.' + d.date.getMonth();
@@ -276,8 +322,8 @@ export class TimeSpiralBuilder {
             .attr('opacity', 1)
             .attr('x', (d) => d.x)
             .attr('y', (d) => d.y)
-            .attr('width', w)
-            .attr('height', (d) => d.size)
+            .attr('width', (d) => (d.na ? w / 10 : w))
+            .attr('height', (d) => (d.na ? d.size / 10 : d.size))
             .attr('transform', (d) => `rotate(${d.angle},${d.x},${d.yr})`)
             .on('mouseover', (e, d) => {
                 bars.transition()
@@ -295,7 +341,7 @@ export class TimeSpiralBuilder {
                 d.date.getMonth() + 1
             }-${d.date.getDate()}`;
             const value = d3.format(this._style.titleFormat)(d.value);
-            return `${date}\n${value}`;
+            return `${date}\n${d.na ? null : value}`;
         });
     }
 
@@ -306,10 +352,25 @@ export class TimeSpiralBuilder {
             wh = w + hw,
             offset = this._skinny ? wh : hw;
 
-        var ticks;
+        let ticks;
         if (style.tickInterval === 'monthly')
             ticks = d3.timeMonth.every(1).range(this._firstDay, this._lastDay);
         else ticks = this._time.ticks();
+
+        // Check whether ticks exist
+        let recalculate = false;
+
+        for (const tick of ticks) {
+            if (!this._bars.find((_) => _.t === this._time(tick))) {
+                this._data.push({
+                    [this._field.date]: tick.toISOString(),
+                    [this._field.value]: null,
+                });
+                recalculate = true;
+            }
+        }
+
+        if (recalculate) this._calculateBars();
 
         const data = ticks.map((d) => {
             const t = this._time(d);
@@ -336,22 +397,29 @@ export class TimeSpiralBuilder {
                     .attr('stroke', style.tickColor)
                     .attr('stroke-width', 1)
                     .attr('stroke-dasharray', '1,1')
-                    .attr('x1', (d) => d.x + offset)
-                    .attr('y1', (d) => d.y0 + hw)
-                    .attr('x2', (d) => d.x + offset)
-                    .attr('y2', (d) => d.y0 - d.offset - lineOffset)
+                    .attr('x1', (d) => d?.x ?? 0 + offset)
+                    .attr('y1', (d) => d?.y0 ?? 0 + hw)
+                    .attr('x2', (d) => d?.x ?? 0 + offset)
+                    .attr('y2', (d) => d?.y0 ?? 0 - d?.offset ?? 0 - lineOffset)
                     .attr(
                         'transform',
-                        (d) => `rotate(${d.angle},${d.x},${d.y0})`
+                        (d) =>
+                            `rotate(${d?.angle ?? 0},${d?.x ?? 0},${
+                                d?.y0 ?? 0
+                            })`
                     )
             );
 
         this._ticks
             .append('text')
             .attr('dy', this._centered ? w : '1em')
-            .attr('x', (d) => d.x - offset + 3)
-            .attr('y', (d) => d.y0 + d.offset)
-            .attr('transform', (d) => `rotate(${d.angle + 180},${d.x},${d.y0})`)
-            .text((d) => `${d.date.getFullYear()}-${d.date.getMonth() + 1}`);
+            .attr('x', (d) => d?.x - offset + 3)
+            .attr('y', (d) => d?.y0 + d?.offset)
+            .attr(
+                'transform',
+                (d) =>
+                    `rotate(${d?.angle ?? 0 + 180},${d?.x ?? 0},${d?.y0 ?? 0})`
+            )
+            .text((d) => `${d?.date.getFullYear()}-${d?.date.getMonth() + 1}`);
     }
 }

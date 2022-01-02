@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import './styles/app.scss';
-import { DataRetrieval } from './repositories/data-retrieval.service';
 import Navigator from './components/Navigator';
 import Overview from './components/pages/Overview';
 import LocationsView from './components/pages/LocationsView';
@@ -16,7 +15,6 @@ export class App extends Component {
             filters: {},
             data: {},
         };
-        DataRetrieval.getInstance();
     }
 
     switchPage(page) {

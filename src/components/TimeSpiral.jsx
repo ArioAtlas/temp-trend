@@ -2,18 +2,16 @@ import { TimeSpiralBuilder } from '../utils/time-spiral.builder';
 import { useD3 } from '../hooks/useD3';
 import * as D3 from 'd3';
 
-const sample = require('../demo.json');
-
-function TimeSpiral({ data = [], diameter }) {
+function TimeSpiral({ data = [], diameter, range, scheme }) {
     const options = {
-        scheme: 'OrRd',
+        scheme,
         diameter,
         align: 'center', // center,base
         barWidth: 'skinny', // skinny,normal
         rounded: true,
         colorBy: 'value', //time,value
         showTicks: true,
-        layers: 4, // 2,3,4
+        layers: data.length < 24 ? 1 : data.length < 150 ? 2 : 3, // 2,3,4
     };
 
     const ref = useD3(
@@ -22,10 +20,10 @@ function TimeSpiral({ data = [], diameter }) {
                 options.scheme === 'OrRd'
                     ? D3.interpolateOrRd
                     : options.scheme === 'YlGnBu'
-                    ? D3.interpolateYlGnBu
-                    : D3.interpolateRdPu;
+                    ? D3.interpolateRdYlBu
+                    : D3.interpolateRdBu;
 
-            if (diameter)
+            if (diameter && data.length)
                 new TimeSpiralBuilder(svg)
                     .size([options.diameter, options.diameter])
                     .layers(options.layers)
@@ -33,17 +31,19 @@ function TimeSpiral({ data = [], diameter }) {
                         align: options.align,
                         colorBy: options.colorBy,
                         tickInterval: 'auto',
-                        titleFormat: '$,.2f',
+                        titleFormat: '.2f',
                         showTicks: options.showTicks,
                         barWidth: options.barWidth,
                         rounded: options.rounded,
+                        reverseColor: true,
                     })
                     .palette(colorScheme)
-                    .field({ value: 'value' })
-                    .data(sample)
+                    .field({ value: 'temperature' })
+                    .data(data)
+                    .range(range)
                     .render();
         },
-        [sample.length, diameter]
+        [data.length, diameter]
     );
 
     return (
