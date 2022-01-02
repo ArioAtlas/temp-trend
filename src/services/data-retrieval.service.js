@@ -1,8 +1,9 @@
-import { groupBy, mapValues, pickBy, pick, has } from 'lodash';
+import { groupBy, mapValues, pickBy, pick, has, valuesIn, flatten } from 'lodash';
 import { CountryCodesRepository } from '../repositories/country-codes.repository';
 import { StationRepository } from '../repositories/stations.repository';
 import { TemperatureRepository } from '../repositories/temperature.repository';
 
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export class DataRetrieval {
     static #instance = null;
     #stationRepository = null;
@@ -176,10 +177,57 @@ export class DataRetrieval {
 
                 return true;
             })
-            .map(({ year, month, temperature, observations }) => ({
+            .map(({ year, month, temperature, observations,station }) => ({
                 date: new Date(`${year}-${month}-1`).toISOString(),
                 temperature,
                 observations,
+                location:station.name,
+                year:year.toString(),
+                monthName:MONTH_NAMES[month],
+                month:new Date(`${year}-${month}-1`)
+            }));
+    }
+
+    getDataByCountry({ country, year, month }) {
+        if (!country || !has(this.#dataset.byCountry, country)) return [];
+
+        return this.#dataset.byCountry[country]
+            .filter((d) => {
+                if (year && Array.isArray(year))
+                    if (year[0] > d.year || year[1] < d.year) return false;
+
+                if (month && Array.isArray(month))
+                    if (month[0] > d.month || month[1] < d.month) return false;
+
+                return true;
+            })
+            .map(({ year, month, temperature, observations,station }) => ({
+                date: new Date(`${year}-${month}-1`).toISOString(),
+                temperature,
+                observations,
+                location:station.name
+            }));
+    }
+
+    getDataByElevation({ elevation, year, month }) {
+        const stations = Object.keys(this.getStationList({elevation}))
+
+        return flatten(valuesIn(pick(this.#dataset.byStation,stations)))
+            .filter((d) => {
+                if (year && Array.isArray(year))
+                    if (year[0] > d.year || year[1] < d.year) return false;
+
+                if (month && Array.isArray(month))
+                    if (month[0] > d.month || month[1] < d.month) return false;
+
+                return true;
+            })
+            .map(({ year, month, temperature, observations,station }) => ({
+                date: new Date(`${0}-${month}-1`).toISOString(),
+                temperature,
+                observations,
+                year:year.toString(),
+                month:MONTH_NAMES[month]
             }));
     }
 }

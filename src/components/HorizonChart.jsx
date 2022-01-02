@@ -2,9 +2,27 @@ import { useD3 } from '../hooks/useD3';
 import * as D3 from 'd3';
 import { HorizonChartBuilder } from '../utils/horizon-chart.builder';
 
-function HorizonChart({ data, width, height }) {
+function HorizonChart({
+    data,
+    width,
+    height,
+    scheme,
+    schemeReverse,
+    dateColumn,
+    labelColumn,
+    valueColumn,
+}) {
     const ref = useD3(
         (svg) => {
+            const colorScheme =
+                scheme === 'YlOrBr'
+                    ? D3.schemeYlOrBr
+                    : scheme === 'RdBu'
+                    ? D3.schemeRdBu
+                    : scheme === 'RdYlBu'
+                    ? D3.schemeRdYlBu
+                    : D3.schemeBuPu;
+            svg.html('');
             const options = {
                 curve: D3.curveLinear, // method of interpolation between points
                 marginTop: 25, // top margin, in pixels
@@ -17,23 +35,36 @@ function HorizonChart({ data, width, height }) {
                 padding: 1, // separation between adjacent horizons
                 xType: D3.scaleUtc, // type of x-scale
                 yType: D3.scaleLinear, // type of y-scale
-                scheme: D3.schemeYlOrBr, // color scheme; shorthand for colors
+                scheme: colorScheme, // color scheme; shorthand for colors
                 darkTheme: true,
+                reverseColor: schemeReverse ?? false,
             };
 
-            if (width && height)
+            console.log(schemeReverse);
+
+            if (width && height && data.length) {
                 new HorizonChartBuilder(
                     svg,
                     data,
                     {
-                        x: (d) => new Date(d.date),
-                        y: (d) => d.value,
-                        z: (d) => d.name,
+                        x: (d) => new Date(d[dateColumn ?? 'date']),
+                        y: (d) => d[valueColumn ?? 'value'],
+                        z: (d) => d[labelColumn ?? 'name'],
                     },
                     options
                 );
+            }
         },
-        [data, width, height]
+        [
+            data,
+            width,
+            height,
+            dateColumn,
+            labelColumn,
+            valueColumn,
+            scheme,
+            schemeReverse,
+        ]
     );
 
     return (

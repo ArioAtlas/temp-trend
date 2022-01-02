@@ -1,16 +1,30 @@
 import { useRef, useState, useEffect } from 'react';
+import { DataRetrieval } from '../../services';
 import RangeSlider from '../slider/RangeSlider';
 import HorizonChart from './../HorizonChart';
 import Selector from '../Selector';
 
-const data = require('../../demo3.json');
+const service = DataRetrieval.getInstance();
+const DEFAULT_COUNTRY = 'SW';
 
-function LocationsView() {
+function LocationsView({ view }) {
     const parent = useRef(null);
     const [layout, setLayout] = useState({
         width: 0,
         height: 0,
     });
+
+    const [filters, setFilters] = useState({
+        country: DEFAULT_COUNTRY,
+        station: null,
+        elevation: null,
+    });
+
+    const [country, setCountry] = useState(service.getCountryList());
+    const [stations, setStations] = useState(
+        service.getStationList({ countryCode: DEFAULT_COUNTRY })
+    );
+    const [data, setData] = useState([]);
 
     useEffect(() => {
         setLayout({
@@ -19,32 +33,90 @@ function LocationsView() {
         });
     }, [parent]);
 
+    useEffect(() => {
+        setCountry(
+            service.getCountryList({
+                elevation: filters.elevation,
+            })
+        );
+    }, [filters.elevation]);
+
+    useEffect(() => {
+        const newStationList = service.getStationList({
+            country: filters.country,
+            elevation: filters.elevation,
+        });
+        setStations(newStationList);
+    }, [filters.country, filters.elevation]);
+
+    useEffect(() => {
+        const filtered = service.getDataByStation({
+            station: filters.station,
+        });
+        setData(filtered);
+    }, [filters.station]);
+
+    const isReady = () => {
+        return filters.country && filters.station;
+    };
+
     return (
         <div className="container">
             <Selector
                 position="left"
-                values={['Page 1', 'Page 2', 'Page 3']}
-                active="Page 2"
+                values={country}
+                active={filters.country}
+                onClick={(selected) =>
+                    setFilters((filters) => ({
+                        ...filters,
+                        country: selected,
+                    }))
+                }
+                get={(item) => item.name}
             />
             <Selector
                 position="right"
-                values={['Page 1', 'Page 2', 'Page 3', 'Page 4']}
-                active="Page 3"
-                onClick={(page) => console.log(page)}
+                values={stations}
+                active={filters.station}
+                onClick={(selected) =>
+                    setFilters((filters) => ({
+                        ...filters,
+                        station: selected,
+                    }))
+                }
+                get={(item) => item.name}
             />
             <div className="plot" ref={parent}>
-                <HorizonChart
-                    data={data}
-                    width={layout.width}
-                    height={layout.height}
-                />
+                {isReady() ? (
+                    <HorizonChart
+                        data={data}
+                        width={layout.width}
+                        height={layout.height}
+                        scheme={view === 'Temperature' ? 'YlOrBr' : ''}
+                        schemeReverse={view === 'Temperature' ? false : true}
+                        dateColumn="year"
+                        labelColumn="monthName"
+                        valueColumn={
+                            view === 'Temperature'
+                                ? 'temperature'
+                                : 'observations'
+                        }
+                    />
+                ) : (
+                    <span className="info">Please choose a station</span>
+                )}
             </div>
             <div className="control">
                 <div className="control-field">
                     <RangeSlider
-                        min={1}
-                        max={12}
-                        callback={(range) => console.log(range)}
+                        min={service.getElevations()[0]}
+                        max={service.getElevations()[1]}
+                        callback={(range) =>
+                            setFilters((filters) => ({
+                                ...filters,
+                                elevation: range,
+                            }))
+                        }
                         trackColor={'#254589'}
                         label="Elevation"
                     />

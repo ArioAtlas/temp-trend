@@ -9,6 +9,7 @@ export class HorizonChartBuilder {
         this._padding = options.padding;
         this._bands = options.bands;
         this._scheme = options.scheme;
+        this._reverseColor = options.reverseColor ?? false;
         this._marginTop = options.marginTop;
         this._marginBottom = options.marginBottom;
         this._marginLeft = options.marginLeft;
@@ -23,7 +24,11 @@ export class HorizonChartBuilder {
 
         const { xType, yType } = options;
 
-        const colors = this._scheme[Math.max(3, this._bands)]; // an array of colors
+        let colors = this._reverseColor
+            ? [...this._scheme[Math.max(3, this._bands)]].reverse()
+            : this._scheme[Math.max(3, this._bands)]; // an array of colors
+
+        console.log(this._reverseColor, colors);
 
         // Compute values.
         this._X = D3.map(data, x);
@@ -44,12 +49,11 @@ export class HorizonChartBuilder {
             ? new D3.InternSet(options.zDomain)
             : new D3.InternSet(this._Z);
 
-        const size = (this._height - this._marginTop - this._marginBottom)/ (zDomain.size?zDomain.size:1)
+        const size =
+            (this._height - this._marginTop - this._marginBottom) /
+            (zDomain.size ? zDomain.size : 1);
         const xRange = [this._marginLeft, this._width - this._marginRight]; // [left, right]
-        const yRange = [
-            size,
-            size - this._bands * (size - this._padding),
-        ]; // [bottom, top]
+        const yRange = [size, size - this._bands * (size - this._padding)]; // [bottom, top]
 
         // Omit any data not present in the z-domain.
         const I = D3.range(this._X.length).filter((i) =>
