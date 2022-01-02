@@ -2,7 +2,14 @@ import { TimeSpiralBuilder } from '../utils/time-spiral.builder';
 import { useD3 } from '../hooks/useD3';
 import * as D3 from 'd3';
 
-function TimeSpiral({ data = [], diameter, range, scheme }) {
+function TimeSpiral({
+    data = [],
+    diameter,
+    field,
+    range,
+    scheme,
+    schemeReverse,
+}) {
     const options = {
         scheme,
         diameter,
@@ -18,11 +25,14 @@ function TimeSpiral({ data = [], diameter, range, scheme }) {
         (svg) => {
             const colorScheme =
                 options.scheme === 'OrRd'
-                    ? D3.interpolateOrRd
-                    : options.scheme === 'YlGnBu'
+                    ? D3.interpolateReds
+                    : options.scheme === 'RdBu'
+                    ? D3.interpolateRdBu
+                    : options.scheme === 'RdYlBu'
                     ? D3.interpolateRdYlBu
-                    : D3.interpolateRdBu;
+                    : D3.interpolateBuPu;
 
+            svg.html('');
             if (diameter && data.length)
                 new TimeSpiralBuilder(svg)
                     .size([options.diameter, options.diameter])
@@ -35,15 +45,15 @@ function TimeSpiral({ data = [], diameter, range, scheme }) {
                         showTicks: options.showTicks,
                         barWidth: options.barWidth,
                         rounded: options.rounded,
-                        reverseColor: true,
+                        reverseColor: schemeReverse ?? false,
                     })
                     .palette(colorScheme)
-                    .field({ value: 'temperature' })
+                    .field({ value: field })
                     .data(data)
                     .range(range)
                     .render();
         },
-        [data.length, diameter]
+        [data.length, diameter, field]
     );
 
     return (

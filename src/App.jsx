@@ -28,13 +28,13 @@ export class App extends Component {
     renderPage() {
         switch (this.state.page) {
             case 'Overview':
-                return <Overview />;
+                return <Overview view={this.state.view} />;
             case 'Locations':
-                return <LocationsView />;
+                return <LocationsView view={this.state.view} />;
             case 'Years':
-                return <YearsView />;
+                return <YearsView view={this.state.view} />;
             case 'Months':
-                return <MonthsView />;
+                return <MonthsView view={this.state.view} />;
             default:
                 return;
         }

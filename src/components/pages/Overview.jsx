@@ -8,7 +8,7 @@ const service = DataRetrieval.getInstance();
 
 const DEFAULT_COUNTRY = 'SW';
 
-function Overview() {
+function Overview({ view }) {
     const parent = useRef(null);
     const [layout, setLayout] = useState({
         width: 0,
@@ -27,7 +27,7 @@ function Overview() {
     const [stations, setStations] = useState(
         service.getStationList({ countryCode: DEFAULT_COUNTRY })
     );
-    const [data, setData] = useState();
+    const [data, setData] = useState([]);
 
     useEffect(() => {
         setLayout({
@@ -53,11 +53,12 @@ function Overview() {
     }, [filters.country, filters.elevation]);
 
     useEffect(() => {
-        const temperatures = service.getTemperaturesByStation({
+        const filtered = service.getDataByStation({
             station: filters.station,
             year: filters.year,
+            month: filters.month,
         });
-        setData(temperatures);
+        setData(filtered);
     }, [filters.station, filters.month, filters.year]);
 
     const isReady = () => {
@@ -94,10 +95,18 @@ function Overview() {
                 {isReady() ? (
                     <TimeSpiral
                         data={data}
-                        colorBy={'temperature'}
-                        field={'temperature'}
-                        scheme="YlGnBu"
-                        range={service.getTemperatureRange()}
+                        field={
+                            view === 'Temperature'
+                                ? 'temperature'
+                                : 'observations'
+                        }
+                        scheme={view === 'Temperature' ? 'RdBu' : 'OrRsd'}
+                        schemeReverse={true}
+                        range={
+                            view === 'Temperature'
+                                ? service.getTemperatureRange()
+                                : service.getObservationRange()
+                        }
                         diameter={Math.min(layout.width, layout.height)}
                     />
                 ) : (

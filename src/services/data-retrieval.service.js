@@ -163,15 +163,23 @@ export class DataRetrieval {
         return this.#aggregated.observations;
     }
 
-    getTemperaturesByStation({ station, year, month }) {
+    getDataByStation({ station, year, month }) {
         if (!station || !has(this.#dataset.byStation, station)) return [];
 
-        return this.#dataset.byStation[station].map(
-            ({ year, month, temperature, observations }) => ({
+        return this.#dataset.byStation[station]
+            .filter((d) => {
+                if (year && Array.isArray(year))
+                    if (year[0] > d.year || year[1] < d.year) return false;
+
+                if (month && Array.isArray(month))
+                    if (month[0] > d.month || month[1] < d.month) return false;
+
+                return true;
+            })
+            .map(({ year, month, temperature, observations }) => ({
                 date: new Date(`${year}-${month}-1`).toISOString(),
                 temperature,
                 observations,
-            })
-        );
+            }));
     }
 }

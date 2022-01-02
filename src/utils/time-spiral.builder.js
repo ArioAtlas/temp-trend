@@ -3,7 +3,6 @@ import { unionBy } from 'lodash';
 
 export class TimeSpiralBuilder {
     constructor(container) {
-        container.html('');
         this._container = container;
         this._g = null;
 
@@ -165,8 +164,6 @@ export class TimeSpiralBuilder {
             this._firstDay = this._data[0][this._field.date];
             this._lastDay = this._data[this._data.length - 1][this._field.date];
         }
-
-        console.log(this._data);
     }
 
     _process() {
@@ -322,8 +319,8 @@ export class TimeSpiralBuilder {
             .attr('opacity', 1)
             .attr('x', (d) => d.x)
             .attr('y', (d) => d.y)
-            .attr('width', (d) => (d.na ? w / 10 : w))
-            .attr('height', (d) => (d.na ? d.size / 10 : d.size))
+            .attr('width', (d) => (d.na ? w / 5 : w))
+            .attr('height', (d) => (d.na ? d.size / 5 : d.size))
             .attr('transform', (d) => `rotate(${d.angle},${d.x},${d.yr})`)
             .on('mouseover', (e, d) => {
                 bars.transition()
