@@ -13,6 +13,14 @@ function HorizonChart({
     valueColumn,
     range,
     neutralValue = null,
+    marginTop = 25,
+    marginRight = 0,
+    marginBottom = 40,
+    marginLeft = 150,
+    bands = 3,
+    padding = 1,
+    darkTheme = true,
+    curvature = 'Linear',
 }) {
     const ref = useD3(
         (svg) => {
@@ -24,24 +32,33 @@ function HorizonChart({
                     : scheme === 'RdYlBu'
                     ? D3.schemeRdYlBu
                     : D3.schemeBuPu;
+
+            const curve =
+                curvature === 'Natural'
+                    ? D3.curveNatural
+                    : curvature === 'Cardinal'
+                    ? D3.curveCardinal
+                    : curvature === 'Basis'
+                    ? D3.curveBasis
+                    : D3.curveLinear;
             svg.html('');
             const options = {
-                curve: D3.curveLinear, // method of interpolation between points
-                marginTop: 25, // top margin, in pixels
-                marginRight: 0, // right margin, in pixels
-                marginBottom: 40, // bottom margin, in pixels
-                marginLeft: 150, // left margin, in pixels
+                curve, // method of interpolation between points
+                marginTop, // top margin, in pixels
+                marginRight, // right margin, in pixels
+                marginBottom, // bottom margin, in pixels
+                marginLeft, // left margin, in pixels
                 width, // outer width, in pixels
                 height, // outer height, in pixels
-                bands: 3, // number of bands
-                padding: 1, // separation between adjacent horizons
-                xType: D3.scaleUtc, // type of x-scale
-                yType: D3.scaleLinear, // type of y-scale
-                scheme: colorScheme, // color scheme; shorthand for colors
-                darkTheme: true,
+                bands, // number of bands
+                padding, // separation between adjacent horizons
+                darkTheme,
                 reverseColor: schemeReverse ?? false,
                 yDomain: range,
                 neutralValue,
+                scheme: colorScheme, // color scheme; shorthand for colors
+                xType: D3.scaleUtc, // type of x-scale
+                yType: D3.scaleLinear, // type of y-scale
             };
 
             const Builder = require('../utils/horizon-chart.builder');
@@ -59,16 +76,7 @@ function HorizonChart({
                 );
             }
         },
-        [
-            data,
-            width,
-            height,
-            dateColumn,
-            labelColumn,
-            valueColumn,
-            scheme,
-            schemeReverse,
-        ]
+        [data, width, height, dateColumn, labelColumn, valueColumn, scheme, schemeReverse]
     );
 
     return (

@@ -223,11 +223,13 @@ export class DataRetrieval {
                 return true;
             })
             .map(({ year, month, temperature, observations,station }) => ({
-                date: new Date(`${0}-${month}-1`).toISOString(),
+                date: new Date(`${year}-${month}-1`).toISOString(),
                 temperature,
                 observations,
+                location:station.name,
                 year:year.toString(),
-                month:MONTH_NAMES[month-1]
+                monthName:MONTH_NAMES[month-1],
+                month:new Date(`${year}-${month}-1`)
             }));
     }
 }
