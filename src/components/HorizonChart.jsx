@@ -1,6 +1,6 @@
 import { useD3 } from '../hooks/useD3';
 import * as D3 from 'd3';
-import { HorizonChartBuilder } from '../utils/horizon-chart.builder';
+// import { HorizonChartBuilder } from '../utils/horizon-chart.builder';
 
 function HorizonChart({
     data,
@@ -11,12 +11,14 @@ function HorizonChart({
     dateColumn,
     labelColumn,
     valueColumn,
+    range,
+    neutralValue = null,
 }) {
     const ref = useD3(
         (svg) => {
             const colorScheme =
                 scheme === 'YlOrBr'
-                    ? D3.schemeYlOrBr
+                    ? D3.schemeRdYlBu
                     : scheme === 'RdBu'
                     ? D3.schemeRdBu
                     : scheme === 'RdYlBu'
@@ -38,12 +40,14 @@ function HorizonChart({
                 scheme: colorScheme, // color scheme; shorthand for colors
                 darkTheme: true,
                 reverseColor: schemeReverse ?? false,
+                yDomain: range,
+                neutralValue,
             };
 
-            console.log(schemeReverse);
+            const Builder = require('../utils/horizon-chart.builder');
 
             if (width && height && data.length) {
-                new HorizonChartBuilder(
+                new Builder.HorizonChartBuilder(
                     svg,
                     data,
                     {

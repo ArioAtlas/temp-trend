@@ -15,6 +15,7 @@ export class HorizonChartBuilder {
         this._marginLeft = options.marginLeft;
         this._marginRight = options.marginRight;
         this._darkTheme = options.darkTheme ?? false;
+        this._neutralValue = options.neutralValue;
 
         const {
             x = ([x]) => x, // given d in data, returns the (temporal) x-value
@@ -23,12 +24,6 @@ export class HorizonChartBuilder {
         } = mapper;
 
         const { xType, yType } = options;
-
-        let colors = this._reverseColor
-            ? [...this._scheme[Math.max(3, this._bands)]].reverse()
-            : this._scheme[Math.max(3, this._bands)]; // an array of colors
-
-        console.log(this._reverseColor, colors);
 
         // Compute values.
         this._X = D3.map(data, x);
@@ -41,6 +36,27 @@ export class HorizonChartBuilder {
             ((d, i) => !isNaN(this._X[i]) && !isNaN(this._Y[i]));
 
         this._D = D3.map(data, defined);
+
+        if (this._neutralValue !== null) {
+            const delta =
+                options?.yDomain &&
+                Array.isArray(options.yDomain) &&
+                options.yDomain.length === 2
+                    ? Math.max(
+                          Math.abs(this._neutralValue - options.yDomain[0]),
+                          Math.abs(this._neutralValue - options.yDomain[1])
+                      )
+                    : Math.max(
+                          Math.abs(this._neutralValue),
+                          Math.abs(this._neutralValue - D3.max(this._Y))
+                      );
+
+            this._bands *= 2;
+            options.yDomain = [
+                this._neutralValue - delta,
+                this._neutralValue + delta,
+            ];
+        }
 
         // Compute default domains, and unique the z-domain.
         const xDomain = options.xDomain ?? D3.extent(this._X);
@@ -67,6 +83,10 @@ export class HorizonChartBuilder {
             .ticks(this._width / 80)
             .tickSizeOuter(0);
 
+        let colors = this._reverseColor
+            ? [...this._scheme[Math.max(3, this._bands)]].reverse()
+            : this._scheme[Math.max(3, this._bands)]; // an array of colors
+
         // A unique identifier for clip paths (to avoid conflicts).
         const uid = `O-${Math.random().toString(16).slice(2)}`;
 
@@ -75,7 +95,7 @@ export class HorizonChartBuilder {
             .defined((i) => this._D[i])
             .curve(this._curve)
             .x((i) => xScale(this._X[i]))
-            .y0(yScale(0))
+            .y0(yScale(this._neutralValue ?? 0))
             .y1((i) => yScale(this._Y[i]));
 
         this._container

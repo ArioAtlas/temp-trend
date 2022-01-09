@@ -93,13 +93,19 @@ function LocationsView({ view }) {
                         width={layout.width}
                         height={layout.height}
                         scheme={view === 'Temperature' ? 'YlOrBr' : ''}
-                        schemeReverse={view === 'Temperature' ? false : true}
+                        schemeReverse={view === 'Temperature' ? true : true}
                         dateColumn="year"
                         labelColumn="monthName"
+                        neutralValue={view === 'Temperature' ? '0' : null}
                         valueColumn={
                             view === 'Temperature'
                                 ? 'temperature'
                                 : 'observations'
+                        }
+                        range={
+                            view === 'Temperature'
+                                ? service.getTemperatureRange()
+                                : service.getObservationRange()
                         }
                     />
                 ) : (
