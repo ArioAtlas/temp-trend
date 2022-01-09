@@ -183,7 +183,7 @@ export class DataRetrieval {
                 observations,
                 location:station.name,
                 year:year.toString(),
-                monthName:MONTH_NAMES[month],
+                monthName:MONTH_NAMES[month-1],
                 month:new Date(`${year}-${month}-1`)
             }));
     }
@@ -227,7 +227,7 @@ export class DataRetrieval {
                 temperature,
                 observations,
                 year:year.toString(),
-                month:MONTH_NAMES[month]
+                month:MONTH_NAMES[month-1]
             }));
     }
 }
