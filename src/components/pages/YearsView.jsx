@@ -31,7 +31,6 @@ function YearsView({ view }) {
             elevation: filters.elevation,
             year: filters.year,
         });
-        console.log(filtered);
         setData(filtered);
     }, [filters.elevation, filters.year]);
 
