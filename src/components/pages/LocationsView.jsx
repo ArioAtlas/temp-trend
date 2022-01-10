@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
 import { DataRetrieval } from '../../services';
 import RangeSlider from '../slider/RangeSlider';
-import HorizonChart from './../HorizonChart';
 import Selector from '../Selector';
+import HeatMap from '../HeatMap';
 
 const service = DataRetrieval.getInstance();
 const DEFAULT_COUNTRY = 'SW';
@@ -21,9 +21,7 @@ function LocationsView({ view }) {
     });
 
     const [country, setCountry] = useState(service.getCountryList());
-    const [stations, setStations] = useState(
-        service.getStationList({ countryCode: DEFAULT_COUNTRY })
-    );
+    const [stations, setStations] = useState(service.getStationList({ countryCode: DEFAULT_COUNTRY }));
     const [data, setData] = useState([]);
 
     useEffect(() => {
@@ -88,25 +86,32 @@ function LocationsView({ view }) {
             />
             <div className="plot" ref={parent}>
                 {isReady() ? (
-                    <HorizonChart
+                    <HeatMap
                         data={data}
                         width={layout.width}
                         height={layout.height}
                         scheme={view === 'Temperature' ? 'YlOrBr' : ''}
                         schemeReverse={view === 'Temperature' ? true : true}
-                        dateColumn="year"
-                        labelColumn="monthName"
-                        neutralValue={view === 'Temperature' ? '0' : null}
-                        valueColumn={
-                            view === 'Temperature'
-                                ? 'temperature'
-                                : 'observations'
-                        }
-                        range={
-                            view === 'Temperature'
-                                ? service.getTemperatureRange()
-                                : service.getObservationRange()
-                        }
+                        horizontalColumn="year"
+                        verticalColumn="monthName"
+                        vDomain={[
+                            'January',
+                            'February',
+                            'March',
+                            'April',
+                            'May',
+                            'June',
+                            'July',
+                            'August',
+                            'September',
+                            'October',
+                            'November',
+                            'December',
+                        ]}
+                        neutralValue={view === 'Temperature' ? '0' : undefined}
+                        tooltipPostfix={view === 'Temperature' ? ' ˚C' : ' observations'}
+                        valueColumn={view === 'Temperature' ? 'temperature' : 'observations'}
+                        range={view === 'Temperature' ? service.getTemperatureRange() : service.getObservationRange()}
                     />
                 ) : (
                     <span className="info">Please choose a station</span>
